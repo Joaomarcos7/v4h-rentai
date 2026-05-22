@@ -1,18 +1,18 @@
+# Build artifacts
+**/bin/
+**/obj/
+
+# Environment secrets
 .env
+
+# VS tooling
+.vs/
+*.user
+
+# User-uploaded files
 backend/uploads/
-backend/src/V4H.API/bin/
-backend/src/V4H.API/obj/
-backend/src/V4H.Domain/bin/
-backend/src/V4H.Domain/obj/
-backend/src/V4H.Application/bin/
-backend/src/V4H.Application/obj/
-backend/src/V4H.Infrastructure/bin/
-backend/src/V4H.Infrastructure/obj/
-backend/tests/V4H.Application.Tests/bin/
-backend/tests/V4H.Application.Tests/obj/
-backend/tests/V4H.API.Tests/bin/
-backend/tests/V4H.API.Tests/obj/
+
+# Angular
 frontend/node_modules/
 frontend/dist/
-*.user
-.vs/
+frontend/.angular/
