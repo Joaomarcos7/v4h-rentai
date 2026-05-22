@@ -92,7 +92,8 @@ app.MapHub<NotificationHub>("/hubs/notifications");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<V4H.Infrastructure.Persistence.AppDbContext>();
-    db.Database.Migrate();
+    if (db.Database.IsRelational())
+        db.Database.Migrate();
 }
 
 app.Run();
