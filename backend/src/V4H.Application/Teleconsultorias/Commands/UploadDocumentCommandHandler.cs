@@ -36,17 +36,16 @@ public class UploadDocumentCommandHandler : IRequestHandler<UploadDocumentComman
 
         using var ms = new MemoryStream();
         await request.FileStream.CopyToAsync(ms, cancellationToken);
-        var bytes = ms.ToArray();
 
         var threshold = _config.GetValue<decimal>("AI:ValidationThreshold", 0.6m);
-        var validationResult = await _validator.ValidateAsync(
-            new MemoryStream(bytes), request.MimeType, cancellationToken);
+        ms.Position = 0;
+        var validationResult = await _validator.ValidateAsync(ms, request.MimeType, cancellationToken);
 
         if (validationResult.Score < threshold)
             throw new DocumentValidationException(validationResult.Score);
 
-        var storedPath = await _storage.SaveAsync(
-            new MemoryStream(bytes), request.FileName, cancellationToken);
+        ms.Position = 0;
+        var storedPath = await _storage.SaveAsync(ms, request.FileName, cancellationToken);
 
         var doc = TeleconsultoriaDocument.Create(
             tc.Id,

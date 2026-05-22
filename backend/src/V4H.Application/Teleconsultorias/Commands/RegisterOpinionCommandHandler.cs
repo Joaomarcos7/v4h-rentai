@@ -36,8 +36,8 @@ public class RegisterOpinionCommandHandler : IRequestHandler<RegisterOpinionComm
         var history = StatusHistory.Create(tc.Id, oldStatus, TeleconsultoriaStatus.Concluida, request.SpecialistId);
         await _repo.AddStatusHistoryAsync(history, cancellationToken);
 
-        await _repo.SaveChangesAsync(cancellationToken);
         await _opinions.SaveChangesAsync(cancellationToken);
+        await _repo.SaveChangesAsync(cancellationToken);
 
         await _notifications.SendNewOpinionAsync(tc.RequesterId, tc.Id, opinion.Id, cancellationToken);
 
