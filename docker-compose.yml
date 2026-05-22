@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: src/V4H.API/Dockerfile
+    environment:
+      ConnectionStrings__Default: "Host=db;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      JWT__Secret: ${JWT_SECRET}
+      AI__ValidationThreshold: "0.6"
+    ports:
+      - "5000:8080"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

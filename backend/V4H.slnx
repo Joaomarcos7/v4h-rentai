@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/V4H.API/V4H.API.csproj" />
+    <Project Path="src/V4H.Application/V4H.Application.csproj" />
+    <Project Path="src/V4H.Domain/V4H.Domain.csproj" />
+    <Project Path="src/V4H.Infrastructure/V4H.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/V4H.API.Tests/V4H.API.Tests.csproj" />
+    <Project Path="tests/V4H.Application.Tests/V4H.Application.Tests.csproj" />
+  </Folder>
+</Solution>

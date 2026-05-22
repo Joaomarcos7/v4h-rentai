@@ -1,0 +1,6 @@
+@V4H.API_HostAddress = http://localhost:5029
+
+GET {{V4H.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
