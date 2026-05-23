@@ -91,10 +91,10 @@
         <h3>Atualizar Status</h3>
         <div style="display:flex;gap:0.75rem;align-items:center">
           <select [(ngModel)]="newStatus" style="padding:0.4rem 0.6rem;border:1px solid #ddd;border-radius:4px">
-            <option [value]="1">Pendente</option>
-            <option [value]="2">Em Andamento</option>
-            <option [value]="3">Concluída</option>
-            <option [value]="4">Cancelada</option>
+            <option [ngValue]="1">Pendente</option>
+            <option [ngValue]="2">Em Andamento</option>
+            <option [ngValue]="3">Concluída</option>
+            <option [ngValue]="4">Cancelada</option>
           </select>
           <button class="btn btn-primary btn-sm" (click)="updateStatus()" [disabled]="actionLoading()">
             Atualizar

@@ -33,10 +33,18 @@ export class DetailComponent implements OnInit {
     return this.route.snapshot.paramMap.get('id')!;
   }
 
+  private static readonly statusMap: Record<string, number> = {
+    Pendente: 1, EmAndamento: 2, Concluida: 3, Cancelada: 4
+  };
+
   load() {
     this.loading.set(true);
     this.tcService.getById(this.id).subscribe({
-      next: (data) => { this.tc.set(data); this.loading.set(false); },
+      next: (data) => {
+        this.tc.set(data);
+        this.newStatus = DetailComponent.statusMap[data.status] ?? 1;
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false)
     });
   }

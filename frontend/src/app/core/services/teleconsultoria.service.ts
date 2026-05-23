@@ -38,7 +38,7 @@ export class TeleconsultoriaService {
   }
 
   updateStatus(id: string, status: number, notes?: string) {
-    return this.http.put(`${this.base}/${id}/status`, { status, notes });
+    return this.http.put(`${this.base}/${id}/status`, { status: +status, notes });
   }
 
   uploadDocument(id: string, file: File) {
