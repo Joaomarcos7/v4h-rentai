@@ -15,7 +15,7 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) {}
 
   register(name: string, email: string, password: string, role: number) {
-    return this.http.post(`${environment.apiUrl}/auth/register`, { name, email, password, role });
+    return this.http.post(`${environment.apiUrl}/auth/register`, { name, email, password, role: +role });
   }
 
   login(email: string, password: string) {

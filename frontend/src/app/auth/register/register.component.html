@@ -23,8 +23,8 @@
       <div class="field">
         <label for="role">Perfil</label>
         <select id="role" [(ngModel)]="role" name="role">
-          <option [value]="1">Solicitante (APS)</option>
-          <option [value]="2">Especialista</option>
+          <option [ngValue]="1">Solicitante (APS)</option>
+          <option [ngValue]="2">Especialista</option>
         </select>
       </div>
       <button type="submit" [disabled]="loading()">
