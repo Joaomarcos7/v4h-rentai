@@ -34,7 +34,7 @@ export class TeleconsultoriaService {
   }
 
   create(dto: CreateTeleconsultoriaDto) {
-    return this.http.post<{ id: string }>(this.base, dto);
+    return this.http.post<{ id: string }>(this.base, { ...dto, specialty: +dto.specialty });
   }
 
   updateStatus(id: string, status: number, notes?: string) {
