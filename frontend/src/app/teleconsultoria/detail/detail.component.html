@@ -60,12 +60,19 @@
       </div>
     }
 
+    @if (newOpinionAlert()) {
+      <div class="alert alert-success" style="display:flex;justify-content:space-between;align-items:center">
+        <span>🔔 Novo parecer recebido!</span>
+        <button (click)="dismissAlert()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:inherit">✕</button>
+      </div>
+    }
+
     <div class="card">
       <h3>Pareceres</h3>
       @if (tc()!.opinions.length === 0) {
         <p style="color:#777;font-size:0.875rem">Nenhum parecer registrado.</p>
       }
-      @for (op of tc()!.opinions; track op.id) {
+      @for (op of sortedOpinions; track op.id) {
         <div class="opinion-item">
           <p class="opinion-meta">{{ op.specialistName }} — {{ op.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
           <p>{{ op.content }}</p>

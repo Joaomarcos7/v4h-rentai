@@ -107,6 +107,44 @@ describe('DetailComponent', () => {
     http.expectNone(`${environment.apiUrl}/teleconsultorias/${TC_ID}`);
   });
 
+  it('should display opinions sorted ascending by createdAt (oldest first, newest at bottom)', () => {
+    const fixture = TestBed.createComponent(DetailComponent);
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+    http.expectOne(`${environment.apiUrl}/teleconsultorias/${TC_ID}`).flush({
+      ...mockTc,
+      opinions: [
+        { id: 'op-2', specialistName: 'Dr. X', content: 'Segundo', createdAt: '2026-05-23T12:00:00Z' },
+        { id: 'op-1', specialistName: 'Dr. X', content: 'Primeiro', createdAt: '2026-05-23T10:00:00Z' },
+      ]
+    });
+    fixture.detectChanges();
+    const sorted = component.sortedOpinions;
+    expect(sorted[0].id).toBe('op-1');
+    expect(sorted[1].id).toBe('op-2');
+  });
+
+  it('should set newOpinionAlert when onNotification called with matching id', () => {
+    const { component } = createAndLoad();
+    expect(component.newOpinionAlert()).toBeFalse();
+
+    component.onNotification({ teleconsultoriaId: TC_ID, opinionId: 'op-x' });
+
+    expect(component.newOpinionAlert()).toBeTrue();
+    // flush reload
+    http.expectOne(`${environment.apiUrl}/teleconsultorias/${TC_ID}`).flush(mockTc);
+  });
+
+  it('should clear newOpinionAlert when dismissAlert() is called', () => {
+    const { component } = createAndLoad();
+    component.onNotification({ teleconsultoriaId: TC_ID, opinionId: 'op-x' });
+    http.expectOne(`${environment.apiUrl}/teleconsultorias/${TC_ID}`).flush(mockTc);
+
+    component.dismissAlert();
+
+    expect(component.newOpinionAlert()).toBeFalse();
+  });
+
   it('should reload when notification signal fires with matching id (effect path)', fakeAsync(() => {
     const { fixture } = createAndLoad();
     const appRef = TestBed.inject(ApplicationRef);

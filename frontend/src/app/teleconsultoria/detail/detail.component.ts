@@ -21,6 +21,7 @@ export class DetailComponent implements OnInit {
   actionLoading = signal(false);
   message = signal<{ type: 'success' | 'error'; text: string } | null>(null);
   newStatus = 2;
+  newOpinionAlert = signal(false);
 
   constructor(
     private route: ActivatedRoute,
@@ -34,10 +35,21 @@ export class DetailComponent implements OnInit {
     }, { allowSignalWrites: true });
   }
 
+  get sortedOpinions() {
+    return [...(this.tc()?.opinions ?? [])].sort((a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+  }
+
   onNotification(payload: { teleconsultoriaId: string; opinionId: string } | null) {
     if (payload && payload.teleconsultoriaId === this.id) {
+      this.newOpinionAlert.set(true);
       this.load();
     }
+  }
+
+  dismissAlert() {
+    this.newOpinionAlert.set(false);
   }
 
   ngOnInit() { this.load(); }
