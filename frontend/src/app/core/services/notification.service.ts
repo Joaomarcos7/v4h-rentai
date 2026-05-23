@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, NgZone, signal } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
@@ -13,7 +13,11 @@ export class NotificationService {
   private connection?: signalR.HubConnection;
   readonly lastOpinionNotification = signal<NewOpinionPayload | null>(null);
 
-  constructor(private auth: AuthService) {}
+  constructor(private auth: AuthService, private zone: NgZone) {}
+
+  handleNewOpinion(payload: NewOpinionPayload) {
+    this.zone.run(() => this.lastOpinionNotification.set(payload));
+  }
 
   connect() {
     if (this.connection) return;
@@ -26,7 +30,7 @@ export class NotificationService {
       .build();
 
     this.connection.on('NewOpinion', (payload: NewOpinionPayload) => {
-      this.lastOpinionNotification.set(payload);
+      this.handleNewOpinion(payload);
     });
 
     this.connection.start().catch(err => console.error('SignalR error:', err));
