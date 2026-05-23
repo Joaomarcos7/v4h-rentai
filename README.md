@@ -7,8 +7,9 @@ Sistema web para gerenciamento do ciclo completo de teleconsultorias no projeto 
 - **Autenticação** — Registro e login com dois perfis: Solicitante (APS) e Especialista
 - **Gestão de Teleconsultorias** — CRUD completo com filtros por especialidade, paciente, status e data
 - **Upload de Documentos com IA** — Validação automática via `IDocumentValidationService` (mock configurável, substituível via DI)
-- **Pareceres** — Especialistas registram pareceres clínicos; status atualizado automaticamente para Concluída
-- **Notificações em Tempo Real** — SignalR notifica o Solicitante quando um parecer é registrado
+- **Pareceres** — Especialistas registram pareceres clínicos ordenados cronologicamente (mais antigo → mais recente); status atualizado automaticamente para Concluída
+- **Notificações em Tempo Real** — SignalR notifica o Solicitante quando um parecer é registrado: badge de alerta descartável na tela de detalhes e no Dashboard com link direto para a teleconsultoria
+- **Linha do Tempo de Status** — Histórico completo de transições de status com data/hora, responsável, status anterior → novo e notas opcionais
 - **Exportação PDF** — Download do relatório completo via QuestPDF
 
 ## Stack
@@ -93,6 +94,61 @@ dotnet test
 ```
 
 Testes unitários (handlers Application) e integração (endpoints API com banco in-memory).
+
+### Frontend
+
+```bash
+cd frontend
+npx ng test --watch=false
+```
+
+18 specs cobrindo: NotificationService, AppComponent (reconexão SignalR), DetailComponent (ordenação, effect, badges, status timeline) e DashboardComponent (badge de notificação).
+
+## Testando o Fluxo Completo de uma Teleconsultoria
+
+Com backend e frontend rodando (`localhost:5000` e `localhost:4200`):
+
+**1. Criar usuários**
+- Registre um Solicitante (APS): `localhost:4200` → Registrar → perfil Solicitante
+- Registre um Especialista: mesma tela → perfil Especialista
+- Abra duas abas do navegador, uma para cada perfil
+
+**2. Criar teleconsultoria (Solicitante)**
+- Faça login como Solicitante
+- Dashboard → Nova Teleconsultoria → preencha paciente, especialidade, hipótese e histórico clínico
+- Opcional: faça upload de um documento (PDF score 0.92, JPEG/PNG score 0.78)
+
+**3. Registrar parecer e validar notificação em tempo real (Especialista)**
+- Faça login como Especialista na segunda aba
+- Navegue até a teleconsultoria criada → Registrar Parecer
+- Na aba do Solicitante, sem recarregar a página:
+  - Na tela de Detalhes: banner "🔔 Novo parecer recebido!" aparece automaticamente
+  - No Dashboard: badge "Novo parecer" na linha da teleconsultoria, com link para o detalhe
+
+**4. Atualizar status (Especialista)**
+- Na tela de Detalhes, selecione um novo status → Atualizar
+- O card "Histórico de Status" registra a transição com data/hora, nome do responsável, status anterior → novo
+
+**5. Exportar PDF (qualquer perfil autenticado)**
+- Detalhe da teleconsultoria → botão ⬇ PDF
+- Relatório completo com dados do paciente, documentos, pareceres e histórico de status
+
+**Configurando ou substituindo o serviço de validação de IA**
+
+O serviço de IA é abstraído pela interface `IDocumentValidationService` (`V4H.Application/Documents/Services/`). Para substituir o mock:
+
+```csharp
+// V4H.Infrastructure/DependencyInjection.cs
+// Troque MockDocumentValidationService pela implementação real:
+services.AddScoped<IDocumentValidationService, MeuServicoDeIAReal>();
+```
+
+Sem nenhuma mudança de contrato — o backend injeta a implementação via DI. Variáveis de ambiente para tuning do mock:
+
+```bash
+AI__ValidationThreshold=0.6   # score mínimo para aprovar documento
+AI__MockScore=0.95             # se definido, sobrepõe o score calculado por mimeType
+```
 
 ## Variáveis de Ambiente
 
@@ -229,7 +285,15 @@ Após a implementação inicial, realizei testes funcionais end-to-end navegando
 |-----|-------|-----------|
 | Download de PDF retornando 401 | `<a [href]>` não passa pelo `HttpClient`, bypassando o `AuthInterceptor` Angular | [ver](docs/bugfixes/2026-05-22-pdf-download-401.md) |
 | Cadastro retornando 400 | `[value]="1"` em `<select>` coage número para string; backend rejeita string em enum | [ver](docs/bugfixes/2026-05-23-register-role-string-400.md) |
+| Cadastro de teleconsultoria retornando 400 | Mesmo padrão `[value]` vs `[ngValue]` no select de especialidade | [ver](docs/bugfixes/2026-05-23-create-specialty-string-400.md) |
 | Atualização de status retornando 500 | Mesma causa do cadastro + dropdown não inicializava com status atual da teleconsultoria | [ver](docs/bugfixes/2026-05-23-update-status-string-500.md) |
+| Notificação SignalR não chegava ao recarregar a página | `connect()` só era chamado no login — sessões persistidas não reconectavam | [ver](docs/bugfixes/2026-05-23-signalr-connect-on-refresh.md) |
+| Notificação SignalR não disparava `effect()` Angular | Callback do SignalR executa fora da NgZone; `signal.set()` fora da zone não aciona Change Detection | [ver](docs/bugfixes/2026-05-23-signalr-ngzone-outside-zone.md) |
+| `effect()` lançava NG0600 ao escrever em signal | Angular proíbe `signal.set()` dentro de `effect()` por padrão — requer `{ allowSignalWrites: true }` | [ver](docs/bugfixes/2026-05-23-effect-ng0600-allowsignalwrites.md) |
+| Detalhe não recarregava ao receber notificação | `effect()` não havia sido implementado — componente não reagia ao signal de notificação | [ver](docs/bugfixes/2026-05-23-signalr-notification-not-reloading-detail.md) |
+| Pareceres exibidos em ordem aleatória | Lista não ordenada — adicionado `sortedOpinions` getter por `createdAt` ASC + badge de novo parecer | [ver](docs/bugfixes/2026-05-23-opinion-sort-and-notification-badge.md) |
+| Notificação ausente no Dashboard ao navegar fora do detalhe | Dashboard não reagia ao signal — adicionado `effect()` com badge e link para a TC afetada | [ver](docs/bugfixes/2026-05-23-dashboard-notification-badge.md) |
+| `statusHistories` ausente na resposta da API de detalhe | Backend tinha domínio e Include mas faltava DTO + `ThenInclude(ChangedBy)` no repositório | [ver](docs/bugfixes/2026-05-23-status-timeline.md) |
 
 Em cada bug, meu comportamento foi: reproduzir com teste automatizado (RED), corrigir (GREEN), e documentar em `docs/bugfixes/` com causa raiz, solução e lição aprendida. Isso garante um histórico real e rastreável do que foi feito e por que — não apenas o código final, mas o caminho percorrido.
 
@@ -247,7 +311,7 @@ Em cada bug, meu comportamento foi: reproduzir com teste automatizado (RED), cor
 - SignalR sem Redis backplane — requerido para múltiplas instâncias em produção
 - **UI/UX simplificada:** dado o prazo do desafio, o foco foi na corretude funcional e nos requisitos técnicos. A interface carece de refinamentos de experiência do usuário que seriam esperados em um produto real:
   - Estados de carregamento (skeletons, spinners por seção) pouco granulares — a tela exibe apenas "Carregando..." global
-  - Feedback de sucesso/erro via alertas simples em texto, sem uso de toast components, snackbars ou badges visuais contextuais
+  - Feedback de sucesso/erro via alertas simples em texto; notificações em tempo real usam banners descartáveis (implementados), mas um sistema de toast centralizado seria mais adequado em produção
   - Ausência de confirmação visual inline para ações críticas (cancelamento de teleconsultoria, envio de parecer)
   - Sem tratamento visual para estados vazios (empty states) nas listagens
   - Validação de formulários sem feedback em tempo real por campo — erros aparecem apenas após submit
