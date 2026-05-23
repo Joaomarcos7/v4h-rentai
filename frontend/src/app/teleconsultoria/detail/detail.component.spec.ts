@@ -1,8 +1,10 @@
-import { TestBed } from '@angular/core/testing';
+import { ApplicationRef } from '@angular/core';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { DetailComponent } from './detail.component';
+import { NotificationService } from '../../core/services/notification.service';
 import { environment } from '../../../environments/environment';
 
 const TC_ID = 'tc-abc-123';
@@ -24,6 +26,7 @@ const mockTc = {
 
 describe('DetailComponent', () => {
   let http: HttpTestingController;
+  let notificationService: NotificationService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -36,6 +39,7 @@ describe('DetailComponent', () => {
       ]
     }).compileComponents();
     http = TestBed.inject(HttpTestingController);
+    notificationService = TestBed.inject(NotificationService);
   });
 
   afterEach(() => http.verify());
@@ -52,14 +56,13 @@ describe('DetailComponent', () => {
 
   it('should initialize newStatus as integer matching current tc status', () => {
     const { component } = createAndLoad();
-    // status "EmAndamento" = 2
     expect(component.newStatus).toBe(2);
   });
 
   it('should send status as number (not string) in updateStatus request', () => {
     const { component } = createAndLoad();
 
-    (component as any).newStatus = '3'; // simulates [value] DOM string coercion
+    (component as any).newStatus = '3';
 
     component.updateStatus();
 
@@ -68,8 +71,39 @@ describe('DetailComponent', () => {
     expect(putReq.request.body['status']).toBe(3);
     putReq.flush({});
 
-    // success handler calls load() → flush the reload GET
     const reloadReq = http.expectOne(`${environment.apiUrl}/teleconsultorias/${TC_ID}`);
     reloadReq.flush(mockTc);
+  });
+
+  it('should reload tc data when onNotification is called with matching teleconsultoria id', () => {
+    const { component } = createAndLoad();
+
+    component.onNotification({ teleconsultoriaId: TC_ID, opinionId: 'opinion-1' });
+
+    const reloadReq = http.expectOne(`${environment.apiUrl}/teleconsultorias/${TC_ID}`);
+    reloadReq.flush({ ...mockTc, opinions: [{ id: 'opinion-1', specialistName: 'Dr. X', content: 'Parecer', createdAt: '2026-05-23T11:00:00Z' }] });
+  });
+
+  it('should NOT reload when onNotification is called with a different teleconsultoria id', () => {
+    createAndLoad();
+
+    // Get a fresh component instance to call onNotification
+    const fixture2 = TestBed.createComponent(DetailComponent);
+    const component2 = fixture2.componentInstance;
+    fixture2.detectChanges();
+    // flush initial load for this instance
+    http.expectOne(`${environment.apiUrl}/teleconsultorias/${TC_ID}`).flush(mockTc);
+
+    component2.onNotification({ teleconsultoriaId: 'other-tc-id', opinionId: 'opinion-99' });
+
+    http.expectNone(`${environment.apiUrl}/teleconsultorias/${TC_ID}`);
+  });
+
+  it('should NOT reload when onNotification is called with null', () => {
+    const { component } = createAndLoad();
+
+    component.onNotification(null);
+
+    http.expectNone(`${environment.apiUrl}/teleconsultorias/${TC_ID}`);
   });
 });

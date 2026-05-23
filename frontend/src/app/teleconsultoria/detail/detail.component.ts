@@ -1,9 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, effect, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TeleconsultoriaService } from '../../core/services/teleconsultoria.service';
 import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { TeleconsultoriaDetail } from '../../core/models/teleconsultoria.model';
 
 @Component({
@@ -24,8 +25,20 @@ export class DetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private tcService: TeleconsultoriaService,
-    public auth: AuthService
-  ) {}
+    public auth: AuthService,
+    notifications: NotificationService
+  ) {
+    effect(() => {
+      const n = notifications.lastOpinionNotification();
+      this.onNotification(n);
+    });
+  }
+
+  onNotification(payload: { teleconsultoriaId: string; opinionId: string } | null) {
+    if (payload && payload.teleconsultoriaId === this.id) {
+      this.load();
+    }
+  }
 
   ngOnInit() { this.load(); }
 
