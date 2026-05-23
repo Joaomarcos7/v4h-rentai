@@ -1,0 +1,49 @@
+<nav class="navbar">
+  <h1>Nova Teleconsultoria</h1>
+  <a routerLink="/dashboard" class="btn btn-secondary btn-sm">← Voltar</a>
+</nav>
+
+<div class="container">
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+
+  <div class="form-card">
+    <form (ngSubmit)="submit()">
+      <div class="field">
+        <label>Nome do Paciente *</label>
+        <input type="text" [(ngModel)]="form.patientName" name="patientName" required />
+      </div>
+      <div class="field">
+        <label>Data de Nascimento *</label>
+        <input type="date" [(ngModel)]="form.birthDate" name="birthDate" required />
+      </div>
+      <div class="field">
+        <label>Especialidade *</label>
+        <select [(ngModel)]="form.specialty" name="specialty">
+          <option [value]="1">Cardiologia</option>
+          <option [value]="2">Cirurgia Robótica</option>
+          <option [value]="3">Odontologia</option>
+          <option [value]="4">Doenças Raras</option>
+          <option [value]="5">Oxigenoterapia</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Hipótese Diagnóstica *</label>
+        <textarea [(ngModel)]="form.diagnosticHypothesis" name="diagnosticHypothesis"
+          rows="3" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:4px" required></textarea>
+      </div>
+      <div class="field">
+        <label>Histórico Clínico *</label>
+        <textarea [(ngModel)]="form.clinicalHistory" name="clinicalHistory"
+          rows="5" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:4px" required></textarea>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:1rem">
+        <button type="submit" class="btn btn-primary" [disabled]="loading()">
+          {{ loading() ? 'Salvando...' : 'Criar Teleconsultoria' }}
+        </button>
+        <a routerLink="/dashboard" class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,106 @@
+<nav class="navbar">
+  <h1>Detalhes da Teleconsultoria</h1>
+  <a routerLink="/dashboard" class="btn btn-secondary btn-sm">← Voltar</a>
+</nav>
+
+<div class="container">
+  @if (loading()) {
+    <p>Carregando...</p>
+  } @else if (!tc()) {
+    <p>Não encontrado.</p>
+  } @else {
+
+    @if (message()) {
+      <div class="alert" [class.alert-success]="message()!.type === 'success'" [class.alert-error]="message()!.type === 'error'">
+        {{ message()!.text }}
+      </div>
+    }
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem">
+        <div>
+          <h2 style="font-size:1.25rem">{{ tc()!.patientName }}</h2>
+          <p style="color:#777;font-size:0.875rem">{{ tc()!.specialty }}</p>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <span [class]="statusBadgeClass(tc()!.status)">{{ tc()!.status }}</span>
+          <a [href]="pdfUrl()" target="_blank" class="btn btn-secondary btn-sm">⬇ PDF</a>
+        </div>
+      </div>
+
+      <div class="detail-row"><span class="detail-label">Nascimento:</span>{{ tc()!.birthDate }}</div>
+      <div class="detail-row"><span class="detail-label">Solicitante:</span>{{ tc()!.requesterName }}</div>
+      <div class="detail-row"><span class="detail-label">Criado em:</span>{{ tc()!.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+      <div class="detail-row"><span class="detail-label">Atualizado em:</span>{{ tc()!.updatedAt | date:'dd/MM/yyyy HH:mm' }}</div>
+      <div style="margin-top:0.75rem">
+        <p class="detail-label">Hipótese Diagnóstica:</p>
+        <p style="margin-top:0.25rem">{{ tc()!.diagnosticHypothesis }}</p>
+      </div>
+      <div style="margin-top:0.75rem">
+        <p class="detail-label">Histórico Clínico:</p>
+        <p style="margin-top:0.25rem">{{ tc()!.clinicalHistory }}</p>
+      </div>
+    </div>
+
+    @if (auth.hasRole('Solicitante')) {
+      <div class="card">
+        <h3>Documentos</h3>
+        @for (doc of tc()!.documents; track doc.id) {
+          <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f0f0f0">
+            <span>{{ doc.fileName }}</span>
+            <span style="font-size:0.8rem;color:#777">Score: {{ doc.validationScore | number:'1.2-2' }} — {{ doc.isApproved ? '✅' : '❌' }}</span>
+          </div>
+        }
+        <div style="margin-top:1rem">
+          <input type="file" (change)="onFileChange($event)" accept=".pdf,.jpg,.jpeg,.png" />
+          <button class="btn btn-primary btn-sm" style="margin-top:0.5rem" (click)="uploadDoc()" [disabled]="!selectedFile || actionLoading()">
+            {{ actionLoading() ? 'Enviando...' : 'Enviar Documento' }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <div class="card">
+      <h3>Pareceres</h3>
+      @if (tc()!.opinions.length === 0) {
+        <p style="color:#777;font-size:0.875rem">Nenhum parecer registrado.</p>
+      }
+      @for (op of tc()!.opinions; track op.id) {
+        <div class="opinion-item">
+          <p class="opinion-meta">{{ op.specialistName }} — {{ op.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+          <p>{{ op.content }}</p>
+        </div>
+      }
+
+      @if (auth.hasRole('Especialista')) {
+        <div style="margin-top:1rem">
+          <label style="font-weight:600;font-size:0.875rem">Registrar Parecer</label>
+          <textarea [(ngModel)]="opinionContent" rows="4"
+            style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:4px;margin-top:0.5rem"
+            placeholder="Descreva o parecer clínico..."></textarea>
+          <button class="btn btn-primary btn-sm" style="margin-top:0.5rem"
+            (click)="submitOpinion()" [disabled]="!opinionContent.trim() || actionLoading()">
+            {{ actionLoading() ? 'Salvando...' : 'Registrar Parecer' }}
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (auth.hasRole('Especialista')) {
+      <div class="card">
+        <h3>Atualizar Status</h3>
+        <div style="display:flex;gap:0.75rem;align-items:center">
+          <select [(ngModel)]="newStatus" style="padding:0.4rem 0.6rem;border:1px solid #ddd;border-radius:4px">
+            <option [value]="1">Pendente</option>
+            <option [value]="2">Em Andamento</option>
+            <option [value]="3">Concluída</option>
+            <option [value]="4">Cancelada</option>
+          </select>
+          <button class="btn btn-primary btn-sm" (click)="updateStatus()" [disabled]="actionLoading()">
+            Atualizar
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>

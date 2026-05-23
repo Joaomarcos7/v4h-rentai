@@ -1,0 +1,81 @@
+<nav class="navbar">
+  <h1>V4H ReNTAI — Teleconsultorias</h1>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <span style="font-size:0.875rem">{{ auth.currentUser()?.name }} ({{ auth.currentUser()?.role }})</span>
+    <button (click)="logout()">Sair</button>
+  </div>
+</nav>
+
+@if (toast()) {
+  <div class="toast">{{ toast() }}</div>
+}
+
+<div class="container">
+  <div class="page-header">
+    <h2>Teleconsultorias</h2>
+    @if (auth.hasRole('Solicitante')) {
+      <a routerLink="/teleconsultorias/new" class="btn btn-primary">+ Nova Solicitação</a>
+    }
+  </div>
+
+  <div class="filters">
+    <div class="field">
+      <label>Paciente</label>
+      <input type="text" [(ngModel)]="filters.patient" placeholder="Buscar paciente..." />
+    </div>
+    <div class="field">
+      <label>Especialidade</label>
+      <select [(ngModel)]="filters.specialty">
+        <option value="">Todas</option>
+        <option value="1">Cardiologia</option>
+        <option value="2">Cirurgia Robótica</option>
+        <option value="3">Odontologia</option>
+        <option value="4">Doenças Raras</option>
+        <option value="5">Oxigenoterapia</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <select [(ngModel)]="filters.status">
+        <option value="">Todos</option>
+        <option value="1">Pendente</option>
+        <option value="2">Em Andamento</option>
+        <option value="3">Concluída</option>
+        <option value="4">Cancelada</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-sm" (click)="applyFilters()">Filtrar</button>
+    <button class="btn btn-secondary btn-sm" (click)="clearFilters()">Limpar</button>
+  </div>
+
+  @if (loading()) {
+    <p>Carregando...</p>
+  } @else if (items().length === 0) {
+    <p style="color:#777;margin-top:2rem;text-align:center">Nenhuma teleconsultoria encontrada.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Paciente</th>
+          <th>Especialidade</th>
+          <th>Status</th>
+          <th>Solicitante</th>
+          <th>Data</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items(); track item.id) {
+          <tr>
+            <td>{{ item.patientName }}</td>
+            <td>{{ item.specialty }}</td>
+            <td><span [class]="statusBadgeClass(item.status)">{{ item.status }}</span></td>
+            <td>{{ item.requesterName }}</td>
+            <td>{{ item.createdAt | date:'dd/MM/yyyy' }}</td>
+            <td><a [routerLink]="['/teleconsultorias', item.id]" class="btn btn-secondary btn-sm">Ver</a></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
