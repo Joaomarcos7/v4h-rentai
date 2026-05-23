@@ -98,8 +98,15 @@ export class DetailComponent implements OnInit {
     });
   }
 
-  pdfUrl(): string {
-    return this.tcService.exportPdfUrl(this.id);
+  downloadPdf() {
+    this.tcService.exportPdf(this.id).subscribe(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `teleconsultoria-${this.id}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
   }
 
   statusBadgeClass(status: string): string {

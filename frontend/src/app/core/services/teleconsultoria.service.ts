@@ -51,7 +51,7 @@ export class TeleconsultoriaService {
     return this.http.post<{ id: string }>(`${this.base}/${id}/opinions`, { content });
   }
 
-  exportPdfUrl(id: string): string {
-    return `${this.base}/${id}/export/pdf`;
+  exportPdf(id: string) {
+    return this.http.get(`${this.base}/${id}/export/pdf`, { responseType: 'blob' });
   }
 }

@@ -24,7 +24,7 @@
         </div>
         <div style="display:flex;gap:0.5rem;align-items:center">
           <span [class]="statusBadgeClass(tc()!.status)">{{ tc()!.status }}</span>
-          <a [href]="pdfUrl()" target="_blank" class="btn btn-secondary btn-sm">⬇ PDF</a>
+          <button (click)="downloadPdf()" class="btn btn-secondary btn-sm">⬇ PDF</button>
         </div>
       </div>
 
