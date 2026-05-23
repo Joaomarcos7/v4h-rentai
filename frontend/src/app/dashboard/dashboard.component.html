@@ -10,6 +10,13 @@
   <div class="toast">{{ toast() }}</div>
 }
 
+@if (pendingOpinionTcId()) {
+  <div class="alert alert-success" style="margin:0.75rem 1.5rem;display:flex;justify-content:space-between;align-items:center">
+    <span>🔔 Novo parecer recebido! <a [routerLink]="['/teleconsultorias', pendingOpinionTcId()]" style="font-weight:600;color:inherit;text-decoration:underline">Ver detalhes →</a></span>
+    <button (click)="dismissDashboardAlert()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:inherit">✕</button>
+  </div>
+}
+
 <div class="container">
   <div class="page-header">
     <h2>Teleconsultorias</h2>
@@ -72,7 +79,12 @@
             <td><span [class]="statusBadgeClass(item.status)">{{ item.status }}</span></td>
             <td>{{ item.requesterName }}</td>
             <td>{{ item.createdAt | date:'dd/MM/yyyy' }}</td>
-            <td><a [routerLink]="['/teleconsultorias', item.id]" class="btn btn-secondary btn-sm">Ver</a></td>
+            <td style="display:flex;align-items:center;gap:0.5rem">
+              <a [routerLink]="['/teleconsultorias', item.id]" class="btn btn-secondary btn-sm">Ver</a>
+              @if (pendingOpinionTcId() === item.id) {
+                <span class="badge badge-inprogress" style="font-size:0.7rem;animation:pulse 1.5s infinite">Novo parecer</span>
+              }
+            </td>
           </tr>
         }
       </tbody>

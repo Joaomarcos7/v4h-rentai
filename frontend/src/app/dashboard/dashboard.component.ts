@@ -17,6 +17,7 @@ export class DashboardComponent implements OnInit {
   items = signal<TeleconsultoriaListItem[]>([]);
   loading = signal(true);
   toast = signal<string | null>(null);
+  pendingOpinionTcId = signal<string | null>(null);
 
   filters = { patient: '', specialty: '', status: '' };
 
@@ -28,10 +29,11 @@ export class DashboardComponent implements OnInit {
     effect(() => {
       const notification = notifications.lastOpinionNotification();
       if (notification) {
+        this.pendingOpinionTcId.set(notification.teleconsultoriaId);
         this.showToast('Novo parecer recebido!');
         this.loadList();
       }
-    });
+    }, { allowSignalWrites: true });
   }
 
   ngOnInit() {
@@ -49,6 +51,8 @@ export class DashboardComponent implements OnInit {
       error: () => this.loading.set(false)
     });
   }
+
+  dismissDashboardAlert() { this.pendingOpinionTcId.set(null); }
 
   applyFilters() { this.loadList(); }
 
