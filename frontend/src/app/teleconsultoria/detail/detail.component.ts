@@ -31,7 +31,7 @@ export class DetailComponent implements OnInit {
     effect(() => {
       const n = notifications.lastOpinionNotification();
       this.onNotification(n);
-    });
+    }, { allowSignalWrites: true });
   }
 
   onNotification(payload: { teleconsultoriaId: string; opinionId: string } | null) {

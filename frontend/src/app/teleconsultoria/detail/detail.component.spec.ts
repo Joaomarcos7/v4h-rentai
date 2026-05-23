@@ -106,4 +106,17 @@ describe('DetailComponent', () => {
 
     http.expectNone(`${environment.apiUrl}/teleconsultorias/${TC_ID}`);
   });
+
+  it('should reload when notification signal fires with matching id (effect path)', fakeAsync(() => {
+    const { fixture } = createAndLoad();
+    const appRef = TestBed.inject(ApplicationRef);
+
+    notificationService.handleNewOpinion({ teleconsultoriaId: TC_ID, opinionId: 'op-99' });
+    tick();
+    appRef.tick();
+    fixture.detectChanges();
+
+    const reloadReq = http.expectOne(`${environment.apiUrl}/teleconsultorias/${TC_ID}`);
+    reloadReq.flush(mockTc);
+  }));
 });
