@@ -134,32 +134,66 @@ WS     /hubs/notifications                        (evento: NewOpinion)
 
 ## Uso de Ferramentas de IA
 
-**Declaração obrigatória conforme requisito do processo seletivo:**
+**Declaração obrigatória conforme requisito do processo seletivo.**
 
-Este projeto foi desenvolvido com assistência ativa do **Claude Code** (Anthropic, modelo `claude-sonnet-4-6`) como ferramenta de desenvolvimento.
+Este projeto foi desenvolvido com assistência ativa do **Claude Code** (Anthropic, modelo `claude-sonnet-4-6`) como ferramenta de desenvolvimento ao longo de todo o ciclo — do brainstorming ao bugfix pós-entrega.
 
-### Como a IA foi utilizada
+### Contexto passado à IA no início do projeto
+
+Antes de qualquer linha de código, o contexto completo do projeto foi apresentado à IA:
+
+- **Natureza do projeto:** desafio técnico de processo seletivo para o LAVID/UFPB. Não iria para produção. O foco era demonstrar domínio técnico e aderência aos requisitos propostos — não pensar em escalabilidade, resiliência ou manutenibilidade como se trataria em um sistema real com ciclo de vida longo.
+- **Prazo:** curto (fim de semana). A escolha de stack precisava equilibrar familiaridade do desenvolvedor com robustez técnica para atender os requisitos.
+- **Stack escolhida com justificativa:** .NET 8 + Angular 17. O desenvolvedor tem maior experiência com essas tecnologias, o que reduzia o risco de não entregar dentro do prazo. Além disso, ambas são stacks modernas, robustas e reconhecidamente escaláveis — atendendo ao requisito técnico mesmo que escalabilidade real não fosse o foco do desafio.
+- **Requisitos declarados:** Clean Architecture, CQRS, TDD, ADRs, diagramas C4, SignalR, validação via IA (mock com interface real), exportação PDF, autenticação JWT.
+
+Com esse contexto estabelecido, a colaboração com a IA foi estruturada para maximizar a qualidade dentro do tempo disponível — priorizando implementar todos os requisitos corretamente, com testes e documentação, em vez de otimizar para cenários que o desafio não exigia.
+
+### Fluxo de trabalho com a IA
+
+O desenvolvimento seguiu um fluxo estruturado via **Superpowers Plugin** para Claude Code, com skills especializadas em cada fase:
+
+**1. Brainstorming (`superpowers:brainstorming`)**
+Definição colaborativa de: modelo de dados, contratos de API, fluxos críticos (upload + IA, parecer + real-time), escolha de bibliotecas (QuestPDF, NSubstitute, MediatR), estratégia de mock para o serviço de IA.
+
+**2. Planejamento (`superpowers:writing-plans`)**
+Geração de três planos de implementação segregados — backend, frontend e documentação — cada um com tasks granulares, steps com código completo, comandos exatos e saída esperada. Nenhum step com "TBD" ou "implementar depois".
+
+**3. Implementação (`superpowers:subagent-driven-development`)**
+Execução task a task via subagentes isolados: cada task recebia um subagente fresco (sem contexto contaminado das anteriores), seguido de revisão de conformidade com o spec e depois revisão de qualidade de código antes de marcar como concluída.
+
+**4. TDD em cada task (`superpowers:test-driven-development`)**
+Todos os handlers de Application foram cobertos com testes unitários escritos antes da implementação (RED → GREEN → REFACTOR). Testes de integração via `WebApplicationFactory` cobrindo os endpoints críticos. Bugfixes descobertos pós-entrega seguiram o mesmo ciclo — teste que reproduz o bug primeiro, depois o fix.
+
+**5. Bugfixes documentados**
+Cada bug encontrado foi corrigido com TDD e documentado em [`docs/bugfixes/`](docs/bugfixes/):
+- Download de PDF retornando 401 — `<a href>` bypassava o interceptor Angular
+- Cadastro retornando 400 — `[value]` em select coagia número para string
+- Atualização de status retornando 500 — mesma causa + dropdown não refletia status atual
+
+### Como a IA foi utilizada por fase
 
 | Fase | Uso |
 |------|-----|
-| **Brainstorming** | Levantamento de requisitos, escolha de stack (.NET 8 + Angular 17), definição de arquitetura (Clean Architecture + CQRS), decisão sobre mock AI service |
-| **Design** | Produção do design spec com modelo de dados, contratos de API, fluxos de dados, fluxo de auth |
-| **Planejamento** | Geração dos planos de implementação segregados (backend, frontend, docs) com tasks, steps e código completo |
-| **Implementação** | Scaffolding de todos os arquivos de código (entidades, handlers, repositórios, serviços, controllers, componentes Angular) com verificação passo a passo |
-| **Testes** | Escrita de testes unitários (NSubstitute) e integração (WebApplicationFactory), identificação de casos de borda (score abaixo do threshold, requester errado) |
-| **Documentação** | Redação dos ADRs, diagramas C4 em Mermaid, README |
+| **Brainstorming** | Levantamento de requisitos, escolha de stack, definição de arquitetura, modelo de dados, contratos de API |
+| **Design Spec** | Documento completo com fluxos de dados, fluxo de auth, ADRs planejados, diagramas C4 |
+| **Planejamento** | Três planos segregados com tasks, steps, código e comandos completos — zero placeholders |
+| **Implementação** | Todos os arquivos de código gerados com revisão spec + qualidade após cada task |
+| **Testes** | Testes unitários e integração escritos via TDD; bugfixes sempre com teste reproduzindo o bug primeiro |
+| **Documentação** | ADRs, diagramas C4 em Mermaid, README, bug reports |
 
 ### Postura durante o uso
 
-- Todas as decisões arquiteturais foram tomadas em colaboração, com explicação dos trade-offs
-- O código gerado foi revisado e validado em cada passo antes de avançar
-- A IA foi usada como par de programação sênior, não como caixa-preta
-- O processo seguiu práticas de spec-driven development, contract-first e TDD
+- Contexto do projeto passado explicitamente antes de qualquer decisão técnica
+- Todas as decisões arquiteturais tomadas em colaboração com explicação de trade-offs
+- IA usada como par de programação sênior — não como caixa-preta
+- Código revisado e validado em cada passo antes de avançar
+- Processo seguiu spec-driven development, contract-first e TDD de forma rigorosa
 
 ### Ferramentas utilizadas
 
-- **Claude Code** (claude.ai/code) — ferramenta principal de desenvolvimento
-- **Superpowers Plugin** — skills de brainstorming, writing-plans, subagent-driven-development para estruturar o fluxo de trabalho com IA
+- **Claude Code** (`claude-sonnet-4-6`) — ferramenta principal
+- **Superpowers Plugin** — skills: `brainstorming`, `writing-plans`, `subagent-driven-development`, `test-driven-development`, `finishing-a-development-branch`
 
 ## Limitações Conhecidas
 
