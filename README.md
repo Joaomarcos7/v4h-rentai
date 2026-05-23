@@ -190,6 +190,49 @@ Cada bug encontrado foi corrigido com TDD e documentado em [`docs/bugfixes/`](do
 - Código revisado e validado em cada passo antes de avançar
 - Processo seguiu spec-driven development, contract-first e TDD de forma rigorosa
 
+### O que foi descartado durante o planejamento
+
+Durante a fase de brainstorming, algumas alternativas foram consideradas e explicitamente descartadas:
+
+- **Next.js no frontend:** cogitado por ser uma stack moderna e popular, mas descartado em favor do Angular 17. O desenvolvedor tem mais experiência com Angular, e dado o prazo apertado, a curva de aprendizado de Next.js representava risco real de não entrega. Angular standalone components + signals atendeu todos os requisitos sem overhead.
+- **Integração de IA real:** o spec original mencionava validação de documentos via IA. A decisão foi implementar um mock robusto com interface real (`IDocumentValidationService`), substituível via DI sem refatoração. Uma integração real (ex.: OpenAI, AWS Textract) adicionaria complexidade e dependência externa que não agregaria valor avaliativo no contexto de um desafio técnico.
+
+Esses descartes foram documentados nos ADRs e no design spec, com justificativa explícita dos trade-offs.
+
+### Avaliação do que funcionou e do que não funcionou
+
+#### O que funcionou bem
+
+**Separar o desenvolvimento em etapas de refinamento progressivo foi o principal fator de sucesso.** O fluxo seguiu uma sequência deliberada e sem pular etapas:
+
+1. Contextualizar a IA com a natureza do projeto, critérios de aceite, prazo e perfil do desenvolvedor
+2. Refinar a arquitetura necessária para lidar com os requisitos (Clean Architecture, CQRS, SignalR, etc.)
+3. Escolher a stack com base na familiaridade do desenvolvedor e nos requisitos técnicos
+4. Definir planos e tasks dimensionados para o prazo disponível
+5. Somente então partir para a implementação
+
+Essa sequência foi determinante para a assertividade do modelo. Ao chegar na fase de implementação com contexto bem definido, arquitetura decidida e plano detalhado, o modelo conseguiu cumprir a maior parte da implementação de forma completa, robusta e testada — sem alucinar APIs inexistentes, sem contradizer o spec e sem over-engineering além do que os requisitos pediam.
+
+#### O que não funcionou inicialmente
+
+No início do projeto, tentamos segregar os planos em poucos blocos grandes. O resultado foi um contexto muito denso por task, o que dificultava a interpretação do modelo e aumentava o risco de desvio do spec.
+
+A partir do momento que dividimos em **três planos independentes** (backend, frontend, documentação) e cada plano em **tasks granulares com subtasks** (steps de 2-5 minutos cada), a execução ficou visivelmente mais rápida, assertiva e fácil de revisar. Tasks menores = menos ambiguidade = menos chance de erro.
+
+**Lição:** granularidade do plano impacta diretamente a qualidade da implementação. Resistir à tentação de agrupar demais.
+
+### Bugfixes pós-entrega — testes funcionais E2E
+
+Após a implementação inicial, foram realizados testes funcionais end-to-end navegando pela aplicação real. Três bugs foram encontrados e corrigidos seguindo TDD (teste reproduzindo o bug primeiro, fix depois):
+
+| Bug | Causa | Documento |
+|-----|-------|-----------|
+| Download de PDF retornando 401 | `<a [href]>` não passa pelo `HttpClient`, bypassando o `AuthInterceptor` Angular | [ver](docs/bugfixes/2026-05-22-pdf-download-401.md) |
+| Cadastro retornando 400 | `[value]="1"` em `<select>` coage número para string; backend rejeita string em enum | [ver](docs/bugfixes/2026-05-23-register-role-string-400.md) |
+| Atualização de status retornando 500 | Mesma causa do cadastro + dropdown não inicializava com status atual da teleconsultoria | [ver](docs/bugfixes/2026-05-23-update-status-string-500.md) |
+
+O comportamento adotado em cada bug foi: reproduzir com teste automatizado (RED), corrigir (GREEN), e documentar em `docs/bugfixes/` com causa raiz, solução e lição aprendida. Isso garante histórico real e rastreável do que foi feito e por que — não apenas o código final, mas o caminho percorrido.
+
 ### Ferramentas utilizadas
 
 - **Claude Code** (`claude-sonnet-4-6`) — ferramenta principal
