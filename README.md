@@ -245,6 +245,12 @@ Em cada bug, meu comportamento foi: reproduzir com teste automatizado (RED), cor
 - Mock AI sem análise real de conteúdo — substituível via DI sem refatoração
 - Sem rate limiting — necessário em produção
 - SignalR sem Redis backplane — requerido para múltiplas instâncias em produção
+- **UI/UX simplificada:** dado o prazo do desafio, o foco foi na corretude funcional e nos requisitos técnicos. A interface carece de refinamentos de experiência do usuário que seriam esperados em um produto real:
+  - Estados de carregamento (skeletons, spinners por seção) pouco granulares — a tela exibe apenas "Carregando..." global
+  - Feedback de sucesso/erro via alertas simples em texto, sem uso de toast components, snackbars ou badges visuais contextuais
+  - Ausência de confirmação visual inline para ações críticas (cancelamento de teleconsultoria, envio de parecer)
+  - Sem tratamento visual para estados vazios (empty states) nas listagens
+  - Validação de formulários sem feedback em tempo real por campo — erros aparecem apenas após submit
 
 ## Licença
 
