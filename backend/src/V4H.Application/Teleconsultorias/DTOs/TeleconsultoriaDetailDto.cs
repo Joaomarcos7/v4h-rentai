@@ -12,4 +12,5 @@ public record TeleconsultoriaDetailDto(
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
     List<DocumentDto> Documents,
-    List<OpinionDto> Opinions);
+    List<OpinionDto> Opinions,
+    List<StatusHistoryDto> StatusHistories);

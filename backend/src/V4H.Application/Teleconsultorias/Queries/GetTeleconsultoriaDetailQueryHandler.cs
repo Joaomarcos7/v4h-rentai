@@ -33,6 +33,16 @@ public class GetTeleconsultoriaDetailQueryHandler
             tc.Documents.Select(d => new DocumentDto(
                 d.Id, d.FileName, d.ValidationScore, d.IsApproved, d.ValidatedAt)).ToList(),
             tc.Opinions.Select(o => new OpinionDto(
-                o.Id, o.Specialist?.Name ?? "", o.Content, o.CreatedAt)).ToList());
+                o.Id, o.Specialist?.Name ?? "", o.Content, o.CreatedAt)).ToList(),
+            tc.StatusHistories
+                .OrderBy(h => h.ChangedAt)
+                .Select(h => new StatusHistoryDto(
+                    h.Id,
+                    h.OldStatus.ToString(),
+                    h.NewStatus.ToString(),
+                    h.ChangedAt,
+                    h.ChangedBy?.Name ?? "",
+                    h.Notes))
+                .ToList());
     }
 }

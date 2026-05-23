@@ -107,6 +107,22 @@ describe('DetailComponent', () => {
     http.expectNone(`${environment.apiUrl}/teleconsultorias/${TC_ID}`);
   });
 
+  it('should expose statusHistories from tc data', () => {
+    const fixture = TestBed.createComponent(DetailComponent);
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+    http.expectOne(`${environment.apiUrl}/teleconsultorias/${TC_ID}`).flush({
+      ...mockTc,
+      statusHistories: [
+        { id: 'sh-1', oldStatus: 'Pendente', newStatus: 'EmAndamento', changedAt: '2026-05-23T10:00:00Z', changedByName: 'Dr. Ana', notes: null },
+        { id: 'sh-2', oldStatus: 'EmAndamento', newStatus: 'Concluida', changedAt: '2026-05-23T12:00:00Z', changedByName: 'Dr. Ana', notes: 'Concluído' },
+      ]
+    });
+    fixture.detectChanges();
+    expect(component.tc()!.statusHistories).toHaveSize(2);
+    expect(component.tc()!.statusHistories[0].id).toBe('sh-1');
+  });
+
   it('should display opinions sorted ascending by createdAt (oldest first, newest at bottom)', () => {
     const fixture = TestBed.createComponent(DetailComponent);
     const component = fixture.componentInstance;

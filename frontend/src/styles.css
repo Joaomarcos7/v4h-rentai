@@ -60,6 +60,12 @@ tr:hover td { background: #f8f9fa; }
 .opinion-item { border-left: 3px solid #1a73e8; padding-left: 0.75rem; margin-bottom: 0.75rem; }
 .opinion-meta { font-size: 0.8rem; color: #777; margin-bottom: 0.25rem; }
 
+.timeline { position: relative; padding-left: 1.25rem; }
+.timeline::before { content: ''; position: absolute; left: 0.35rem; top: 0; bottom: 0; width: 2px; background: #e0e0e0; }
+.timeline-item { position: relative; margin-bottom: 1rem; }
+.timeline-dot { position: absolute; left: -1.25rem; top: 0.3rem; width: 10px; height: 10px; border-radius: 50%; background: #1a73e8; border: 2px solid #fff; box-shadow: 0 0 0 2px #1a73e8; }
+.timeline-content { padding-left: 0.25rem; }
+
 .toast { position: fixed; top: 1rem; right: 1rem; background: #1a73e8; color: white; padding: 0.75rem 1.25rem; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 9999; font-size: 0.9rem; animation: slideIn 0.3s ease; }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 

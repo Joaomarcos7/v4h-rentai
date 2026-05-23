@@ -1,6 +1,15 @@
 import { DocumentModel } from './document.model';
 import { OpinionModel } from './opinion.model';
 
+export interface StatusHistoryItem {
+  id: string;
+  oldStatus: string;
+  newStatus: string;
+  changedAt: string;
+  changedByName: string;
+  notes: string | null;
+}
+
 export type TeleconsultoriaStatus =
   | 'Pendente' | 'EmAndamento' | 'Concluida' | 'Cancelada';
 
@@ -26,6 +35,7 @@ export interface TeleconsultoriaDetail {
   updatedAt: string;
   documents: DocumentModel[];
   opinions: OpinionModel[];
+  statusHistories: StatusHistoryItem[];
 }
 
 export interface CreateTeleconsultoriaDto {

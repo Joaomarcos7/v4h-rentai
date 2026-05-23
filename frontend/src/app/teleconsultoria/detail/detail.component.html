@@ -93,6 +93,34 @@
       }
     </div>
 
+    <div class="card">
+      <h3>Histórico de Status</h3>
+      @if (!tc()!.statusHistories || tc()!.statusHistories.length === 0) {
+        <p style="color:#777;font-size:0.875rem">Nenhuma alteração de status registrada.</p>
+      } @else {
+        <div class="timeline">
+          @for (h of tc()!.statusHistories; track h.id) {
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <p style="font-size:0.8rem;color:#777;margin:0">
+                  {{ h.changedAt | date:'dd/MM/yyyy HH:mm' }} — {{ h.changedByName }}
+                </p>
+                <p style="margin:0.25rem 0 0">
+                  <span [class]="statusBadgeClass(h.oldStatus)">{{ h.oldStatus }}</span>
+                  <span style="margin:0 0.4rem">→</span>
+                  <span [class]="statusBadgeClass(h.newStatus)">{{ h.newStatus }}</span>
+                </p>
+                @if (h.notes) {
+                  <p style="margin:0.25rem 0 0;font-size:0.875rem;color:#555;font-style:italic">{{ h.notes }}</p>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
     @if (auth.hasRole('Especialista')) {
       <div class="card">
         <h3>Atualizar Status</h3>

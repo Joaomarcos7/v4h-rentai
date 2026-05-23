@@ -32,7 +32,7 @@ public class TeleconsultoriaRepository : ITeleconsultoriaRepository
             .Include(t => t.Requester)
             .Include(t => t.Documents)
             .Include(t => t.Opinions).ThenInclude(o => o.Specialist)
-            .Include(t => t.StatusHistories)
+            .Include(t => t.StatusHistories).ThenInclude(h => h.ChangedBy)
             .FirstOrDefaultAsync(t => t.Id == id, ct);
 
     public async Task AddAsync(Teleconsultoria tc, CancellationToken ct = default)
